@@ -16,6 +16,7 @@
         <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <flink.version>1.17.0</flink.version>
+        <mysql.verson>8.0.30</mysql.verson>
         <lombok.version>1.18.26</lombok.version>
     </properties>
     <dependencies>
@@ -54,11 +55,29 @@
             <version>${flink.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-connector-jdbc</artifactId>
+            <version>1.17-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>${mysql.verson}</version>
+        </dependency>
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
         </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>apache-snapshots</id>
+            <name>apache snapshots</name>
+            <url>https://repository.apache.org/content/repositories/snapshots</url>
+        </repository>
+    </repositories>
 
     <build>
         <plugins>
