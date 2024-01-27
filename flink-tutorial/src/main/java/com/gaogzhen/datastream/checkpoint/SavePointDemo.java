@@ -1,21 +1,12 @@
 package com.gaogzhen.datastream.checkpoint;
 
-import com.gaogzhen.datastream.bean.WaterSensor;
-import com.gaogzhen.datastream.functions.WaterSensorMapFuntion;
-import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
-import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.CheckpointingMode;
-import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
+import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
-import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
-import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 
 import java.time.Duration;
@@ -24,12 +15,13 @@ import java.time.Duration;
  * @author gaogzhen
  * @since 2023/12/10 15:30
  */
-public class CheckConfigDemo {
+public class SavePointDemo {
     public static void main(String[] args) throws Exception {
 
-        // StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(new Configuration());
-        env.setParallelism(1);
+        Configuration configuration = new Configuration();
+
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(configuration);
+
 
         // 代码中用到hdfs，需要导入hadoop依赖，指定访问hdfs的用户名
         System.setProperty("HADOOP_USER_NAME", "hadoop");
@@ -66,10 +58,10 @@ public class CheckConfigDemo {
                     for (String word : words) {
                         out.collect(Tuple2.of(word, 1));
                     }
-                })
+                }).uid("wc-flatmap")
                 .returns(Types.TUPLE(Types.STRING, Types.INT))
                 .keyBy(v -> v.f0)
-                .sum(1)
+                .sum(1).uid("wc-sum")
                 .print();
 
 

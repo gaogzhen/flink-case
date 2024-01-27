@@ -1,21 +1,12 @@
 package com.gaogzhen.datastream.checkpoint;
 
-import com.gaogzhen.datastream.bean.WaterSensor;
-import com.gaogzhen.datastream.functions.WaterSensorMapFuntion;
-import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
-import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.CheckpointingMode;
-import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
+import org.apache.flink.streaming.api.environment.ExecutionCheckpointingOptions;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
-import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
-import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 
 import java.time.Duration;
@@ -24,12 +15,20 @@ import java.time.Duration;
  * @author gaogzhen
  * @since 2023/12/10 15:30
  */
-public class CheckConfigDemo {
+public class ChangeLogDemo {
     public static void main(String[] args) throws Exception {
 
         // StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(new Configuration());
+        Configuration configuration = new Configuration();
+        // 最终检查点1.15开始，默认开启
+        // configuration.set(ExecutionCheckpointingOptions.ENABLE_CHECKPOINTS_AFTER_TASKS_FINISH, false);
+
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(configuration);
         env.setParallelism(1);
+
+        // 开启changelog
+        // 要求：checkpoint最多并发1；其他参数建议在配置文件flink-conf中指定
+        env.enableChangelogStateBackend(true);
 
         // 代码中用到hdfs，需要导入hadoop依赖，指定访问hdfs的用户名
         System.setProperty("HADOOP_USER_NAME", "hadoop");
